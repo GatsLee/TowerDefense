@@ -57,13 +57,29 @@ public class TypeOneDefenseUnitController : MonoBehaviour
         // if fire interval is done
         // shoot the bullet: instantiate the bullet & set the bullet's target
         // change the body with no bullet for fire interval
+		
+		// check if the target is destroyed
+		if (targetLocked.IsDestroyed())
+		{
+			targetLocked = null;
+		}
+
+		// if game is over, destroy the defense unit
+		if (GameManager.Instance.isGameOver)
+		{
+			Destroy(gameObject);
+		}
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+		if (targetLocked != null)
+		{
+			return;
+		}
         if (collision.gameObject.tag == "Enemy")
         {
-            Debug.Log("Enemy in range");
+            //Debug.Log("Enemy in range");
 			targetLocked = collision.gameObject;
             EnemyController enemyController = targetLocked.GetComponent<EnemyController>();
 			targetTransform = enemyController.transform;
@@ -74,6 +90,21 @@ public class TypeOneDefenseUnitController : MonoBehaviour
 
 	private void OnTriggerStay2D(Collider2D collision)
 	{
+		if (targetLocked == null)
+		{
+			// renew targetLocked
+			if (collision.gameObject.tag == "Enemy")
+			{
+				//Debug.Log("Enemy in range");
+				targetLocked = collision.gameObject;
+				EnemyController enemyController = targetLocked.GetComponent<EnemyController>();
+				targetTransform = enemyController.transform;
+				targetDirection = enemyController.GetDirection();
+				targetSpeed = enemyController.GetSpeed();
+			}
+			return;
+		}
+
 		if (collision.gameObject == targetLocked)
 		{
 			targetTransform = targetLocked.transform;
@@ -85,7 +116,7 @@ public class TypeOneDefenseUnitController : MonoBehaviour
 	{
 		if (collision.gameObject == targetLocked)
 		{
-            Debug.Log("Enemy out of range");
+            //Debug.Log("Enemy out of range");
 			targetLocked = null;
 		}
 	}
@@ -109,6 +140,6 @@ public class TypeOneDefenseUnitController : MonoBehaviour
         GameObject bullet = Instantiate(typeOneBullet, shootPartTransform.position, shootPartTransform.rotation);
         Rigidbody2D bulletRigidBody = bullet.GetComponent<Rigidbody2D>();
         bulletRigidBody.AddForce(new Vector2(shootPartTransform.up.x, shootPartTransform.up.y).normalized * bulletSpeed, ForceMode2D.Impulse);
-        Debug.Log("Bullet Fired");
+        //Debug.Log("Bullet Fired");
 	}
 }

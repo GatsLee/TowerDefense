@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 9184361691565178810}
   m_Layer: 0
   m_Name: type1Bullet
-  m_TagString: Untagged
+  m_TagString: TypeOneBullet
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

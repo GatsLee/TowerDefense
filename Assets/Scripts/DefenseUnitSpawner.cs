@@ -21,6 +21,8 @@ public class DefenseUnitSpawner : MonoBehaviour, IPointerEnterHandler,
 	private GameObject defensePrefab;
 	private Vector3 originalPosition;
 
+	private int defenseCost;
+
 	void Start()
     {
         Button defenseUnitButton = GetComponent<Button>();
@@ -28,16 +30,19 @@ public class DefenseUnitSpawner : MonoBehaviour, IPointerEnterHandler,
 		{
 			defenseSprite = typeOneSprite;
 			defensePrefab = typeOnePrefab;
+			defenseCost = 50;
 		}
 		else if (transform.tag == "TypeTwo")
 		{ 
 			defenseSprite = typeTwoSprite;
 			defensePrefab = typeTwoPrefab;
+			defenseCost = 70;
 		}
 		else if (transform.tag == "TypeThree")
 		{ 
 			defenseSprite = typeThreeSprite;
 			defensePrefab = typeThreePrefab;
+			defenseCost = 500;
 		}
 		originalPosition = defenseSprite.transform.position;
 	}
@@ -64,6 +69,12 @@ public class DefenseUnitSpawner : MonoBehaviour, IPointerEnterHandler,
 
 	public void OnPointerDown(PointerEventData eventData)
 	{
+		//check if player has enough money
+		if (GameManager.Instance.playerMoney < defenseCost)
+		{
+			Debug.Log("Not enough money");
+			return;
+		}
 		//Debug.Log("Pointer Down");
 		Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 		currentDefense = defenseSprite;
@@ -73,13 +84,16 @@ public class DefenseUnitSpawner : MonoBehaviour, IPointerEnterHandler,
 	public void OnPointerUp(PointerEventData eventData)
 	{
 		//Debug.Log("Pointer Up");
+		if (GameManager.Instance.playerMoney < defenseCost)
+		{
+			Debug.Log("Not enough money");
+			return;
+		}
 		if (MapManager.Instance.activeTilePosition != Vector3.zero)
 		{
 			//Debug.Log("Placing Defense Unit");
 			GameObject test = Instantiate(defensePrefab, MapManager.Instance.activeTilePosition, Quaternion.identity);
-			//Debug.Log("Placed Position: " + MapManager.Instance.activeTilePosition);
-			//Debug.Log("Defense Unit Position: " + test.transform.position);
-			//Debug.Log(test);
+			GameManager.Instance.playerMoney -= defenseCost;
 		}
 		isDragging = false;
 		currentDefense.transform.position = originalPosition;

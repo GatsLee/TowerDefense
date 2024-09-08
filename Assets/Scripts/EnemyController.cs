@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using TreeEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -11,10 +10,12 @@ public class EnemyController : MonoBehaviour
     private int coorIndex;
     private float speed = 0.8f;
     private int health = 0;
+    private int moneyEarned = 10;
 
     private Vector3[] pathIndex;
     private int currentTargetIndex = 0;
     private Vector3 prevPosition;
+
 
     void Start()
     {
@@ -37,12 +38,15 @@ public class EnemyController : MonoBehaviour
         {
             case 1:
                 health = 2;
+                moneyEarned = 20;
                 break;
             case 2:
                 health = 4;
+                moneyEarned = 40;
                 break;
             case 3:
                 health = 8;
+                moneyEarned = 60;
                 break;
         }
 
@@ -71,7 +75,17 @@ public class EnemyController : MonoBehaviour
         }
         if (currentTargetIndex == coorIndex)
 		{
-			// GameManager.Instance.LoseLife();
+            GameManager.Instance.playerHealth -= 1;
+            GameManager.Instance.unitSum += 1;
+			Destroy(gameObject);
+            return;
+		}
+        if (health <= 0)
+		{
+			GameManager.Instance.enemySurvived -= 1;
+            GameManager.Instance.playerMoney += moneyEarned;
+			GameManager.Instance.unitSum += 1;
+            Debug.Log(GameManager.Instance.unitSum);
 			Destroy(gameObject);
 		}
     }
@@ -96,8 +110,9 @@ public class EnemyController : MonoBehaviour
         }
     }
 
-    public void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
+        //Debug.Log("Target hit");
         if (collision.gameObject.tag == "TypeOneBullet")
         {
             health -= 1;

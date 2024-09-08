@@ -8,6 +8,8 @@ TagManager:
   - TypeTwo
   - TypeThree
   - Enemy
+  - TypeOneBullet
+  - TypeTwoBullet
   layers:
   - Default
   - TransparentFX
@@ -44,4 +46,10 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Default UI
+    uniqueID: 343476749
+    locked: 0
+  - name: Game Over UI
+    uniqueID: 2937916103
     locked: 0

@@ -1,13 +1,45 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    public int currentLevel = 1;
-    private float spawnInterval = 1.0f;
 
     private static GameManager instance;
+
+    // Enemy Prefabs;
+    [SerializeField] private GameObject LV1Enemy;
+    [SerializeField] private GameObject LV2Enemy;
+    [SerializeField] private GameObject LV3Enemy;
+
+    // Lv1: 4 points, Lv2: 8 points, Lv3: 9 points
+    public Vector3[] LV1PathArr;
+    public Vector3[] LV2PathArr;
+    public Vector3[] LV3PathArr;
+
+    // Lv1: { 6, 0, 0 }, Lv2: { 3, 3, 0 }, Lv3: { 2, 2, 2 }
+    public int[] LV1EnemyArr;
+    public int[] LV2EnemyArr;
+    public int[] LV3EnemyArr;
+
+    //GameOver UI manage
+    [SerializeField] private GameObject gameOverUI;
+    [SerializeField] private TextMeshProUGUI gameOverText;
+
+    // check if enemy is spawned
+    private bool []enemySpawnArr;
+
+    public int currentLevel = 1;
+    public int playerHealth = 3;
+    public int enemySurvived = 6;
+    public int playerMoney = 100;
+    public int unitSum = 0;
+    public bool isGameOver = false;
+
+    private float spawnInterval = 1.0f;
+
 
     public static GameManager Instance
     {
@@ -24,24 +56,6 @@ public class GameManager : MonoBehaviour
             return instance;
         }
     }
-    // Enemy Prefabs;
-    [SerializeField] private GameObject LV1Enemy;
-    [SerializeField] private GameObject LV2Enemy;
-    [SerializeField] private GameObject LV3Enemy;
-
-    // Lv1: 4 points, Lv2: 8 points, Lv3: 9 points
-    public Vector3[] LV1PathArr;
-    public Vector3[] LV2PathArr;
-    public Vector3[] LV3PathArr;
-
-    // Lv1: { 6, 0, 0 }, Lv2: { 3, 3, 0 }, Lv3: { 2, 2, 2 }
-    public int[] LV1EnemyArr;
-    public int[] LV2EnemyArr;
-    public int[] LV3EnemyArr;
-
-    private bool []enemySpawnArr;
-
-    // Start is called before the first frame update
     private void Awake()
     {
         if (instance == null)
@@ -95,6 +109,7 @@ public class GameManager : MonoBehaviour
                                         3, 3};
         enemySpawnArr = new bool[] {false, false, false, false, false, false};
 		currentLevel = 1;
+        gameOverUI.SetActive(false);
 	}
 
     void Start()
@@ -108,14 +123,35 @@ public class GameManager : MonoBehaviour
         if (spawnInterval <= 0)
 		{
 			GameObject enemy = InstantiateRandomEnemy();
-            if (enemy == null) { return; }
-			spawnInterval = 1.0f;
+            if (enemy != null) { 
+                spawnInterval = 1.0f;
+            }
 		}
 		else
 		{
 			spawnInterval -= Time.deltaTime;
 		}
 
+        // Check if Game is Over
+        if (unitSum >= 6 || playerHealth <= 0)
+        {
+            Debug.Log("Game Over!");
+            gameOverUI.SetActive(true);
+            if (playerHealth <= 0)
+			{
+				gameOverText.text = "Game Over!";
+			}
+			else if (enemySurvived <= 0)
+			{
+				gameOverText.text = "You Win!";
+			}
+            isGameOver = true;
+        }
+        if (isGameOver && Input.GetKeyDown(KeyCode.Escape))
+		{
+            Application.Quit();
+			return;
+		}
     }
 
     GameObject InstantiateRandomEnemy()
@@ -138,6 +174,27 @@ public class GameManager : MonoBehaviour
 				enemy = Instantiate(LV3Enemy, LV3PathArr[0], Quaternion.identity);
 				break;
 		}
+        enemySpawnArr[randEnemy] = true;
         return enemy;
     }
+
+    public void ReplayGame()
+    {
+        unitSum = 0;
+        playerHealth = 3;
+        enemySurvived = 6;
+        playerMoney = 100;
+        currentLevel = 1;
+        gameOverUI.SetActive(false);
+        SceneManager.LoadScene("GameScene");
+        for (int i = 0; i < 6; i++)
+        {
+            enemySpawnArr[i] = false;
+        }
+    }
+
+    public void QuitGame()
+	{
+        Application.Quit();
+	}
 }
